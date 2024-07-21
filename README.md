@@ -18,6 +18,6 @@
 
 * Composer 2.0.5
 
-*Tenha a docker instaladas em seu dispositivo e execute inicialize-o antes de executar o comando docker.
+*Tenha a docker instalada em seu dispositivo e execute inicialize-o antes de executar o comando docker.
 
 BONUS: Abra o PgAdmin em [http://localhost:8090](http://localhost:8090) no seu navegador ou importe a collection do projeto no seu aplicativo (recomendado: Postman)
