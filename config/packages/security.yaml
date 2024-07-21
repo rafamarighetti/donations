@@ -36,7 +36,25 @@ security:
         authenticators:
           - lexik_jwt_authentication.jwt_token_authenticator
     user:
-      pattern: ^/user
+      pattern: ^/users
+      stateless: true
+      anonymous: false
+      provider: entity_provider
+      guard:
+        authenticators:
+          - lexik_jwt_authentication.jwt_token_authenticator
+
+    projects:
+      pattern: ^/projects
+      stateless: true
+      anonymous: false
+      provider: entity_provider
+      guard:
+        authenticators:
+          - lexik_jwt_authentication.jwt_token_authenticator
+
+    donations:
+      pattern: ^/donations
       stateless: true
       anonymous: false
       provider: entity_provider
@@ -48,8 +66,14 @@ security:
     - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
     - { path: ^/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
     - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
-    - { path: ^/user/create, roles: ROLE_ADMIN }
-    - { path: ^/user/edit, roles: ROLE_USER }
-    - { path: ^/user/view, roles: ROLE_USER }
-    - { path: ^/user/delete, roles: ROLE_USER }
-
+    - { path: ^/users, roles: ROLE_USER }
+    - { path: ^/users/create, roles: ROLE_ADMIN }
+    - { path: ^/users/edit, roles: ROLE_USER }
+    - { path: ^/users/view, roles: ROLE_USER }
+    - { path: ^/users/delete, roles: ROLE_USER }
+    - { path: ^/api/projects, roles: ROLE_USER  }
+    - { path: ^/api/projects/create, roles: ROLE_USER  }
+    - { path: ^/api/projects/edit, roles: ROLE_USER  }
+    - { path: ^/api/projects/delete, roles: ROLE_USER  }
+    - { path: ^/api/projects/create, roles: ROLE_USER  }
+    - { path: ^/api/projects/donations, roles: ROLE_USER  }

@@ -1,42 +1,23 @@
-Here are routes for  API &#8595;
+## Iniciando Aplicação para desenvolvimento
 
-register:
-  path: /register
-  controller: App\Controller\AuthController::register
-  methods: [ POST ]
+1 - Navegue para a pasta backend (cmd: cd backend):
 
-api:
-  path: /api
-  controller: App\Controller\AuthController::api
+2 -  Altere o arquivo .env a e procure por DEV AMBIENT VARIABLE, descomente a url abaixo e comente a que está abaixo de DOCKER AMBIENT VARIABLE
 
-create:
-  path: /user/create
-  controller: App\Controller\UserController::create
-  methods: [POST]
+3 - Execute no seu terminal CMD (cmd: docker compose up) para iniciar o banco de dados*
 
-delete:
-  path: /user/delete
-  controller: App\Controller\UserController::delete
-  methods: [ POST ]
+5 - Execute (cmd: php bin/console doctrine:migrations:migrate) para criar as tabelas relacionadas as entidades
 
-edit:
-  path: /user/edit
-  controller: App\Controller\UserController::edit
-  methods: [ POST ]
+6 - Inicie a aplicação executando no seu terminal CMD (cmd: symfony server:start --port=9000)
 
-view:
-  path: /user/view/{email}
-  controller: App\Controller\UserController::view
-  methods: [ GET ]
 
-app:
-  path: /{params}
-  controller: App\Controller\DefaultController::index
-  requirements:
-    params: "^(?!admin|api).+"
 
-api_login_check:
-  path: /api/login_check
-  controller: App\Controller\AuthController::login
-  methods: [ POST ]
-  
+## Requisitos
+
+* PHP 8.0.10 
+
+* Composer 2.0.5
+
+*Tenha a docker instaladas em seu dispositivo e execute inicialize-o antes de executar o comando docker.
+
+BONUS: Abra o PgAdmin em [http://localhost:8090](http://localhost:8090) no seu navegador ou importe a collection do projeto no seu aplicativo (recomendado: Postman)

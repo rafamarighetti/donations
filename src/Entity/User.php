@@ -10,8 +10,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 
-
-
 /**
  *
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -178,9 +176,9 @@ class User implements UserInterface
     /**
      * @return Collection|Auth[]
      */
-    public function getUserId(): Collection
+    public function getUserId()
     {
-        return $this->user_id;
+        return $this->id;
     }
 
     /**

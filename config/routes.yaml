@@ -7,23 +7,28 @@ api:
   path: /api
   controller: App\Controller\AuthController::api
 
+users:
+  path: /users
+  controller: App\Controller\UserController::users
+  methods: [ GET ]
+
 create:
-  path: /user/create
+  path: /users/create
   controller: App\Controller\UserController::create
-  methods: [POST]
+  methods: [ POST ]
 
 delete:
-  path: /user/delete
+  path: /users/delete/{id}
   controller: App\Controller\UserController::delete
-  methods: [ POST ]
+  methods: [ DELETE ]
 
 edit:
-  path: /user/edit
+  path: /users/edit/{id}
   controller: App\Controller\UserController::edit
-  methods: [ POST ]
+  methods: [ PUT ]
 
 view:
-  path: /user/view/{email}
+  path: /users/view/{id}
   controller: App\Controller\UserController::view
   methods: [ GET ]
 
@@ -34,6 +39,41 @@ app:
     params: "^(?!admin|api).+"
 
 api_login_check:
-  path: /api/login_check
+  path: /api/login
   controller: App\Controller\AuthController::login
   methods: [ POST ]
+
+projects:
+    path: /api/projects
+    controller: App\Controller\ProjectController::projects
+    methods: [ GET ]
+
+addProject:
+    path: /api/projects/create
+    controller: App\Controller\ProjectController::addProject
+    methods: [ POST ]
+
+editProject:
+    path: /api/projects/edit/{id}
+    controller: App\Controller\ProjectController::editProject
+    methods: [ PUT ]
+
+deleteProject:
+    path: /api/projects/delete/{id}
+    controller: App\Controller\ProjectController::deleteProject
+    methods: [ DELETE ]
+
+viewProject:
+  path: /api/projects/view/{id}
+  controller: App\Controller\ProjectController::getProjectById
+  methods: [ GET ]
+
+donateProject:
+    path: /api/projects/{projectId}/donations
+    controller: App\Controller\ProjectController::addDonation
+    methods: [ POST ]
+
+donationsProject:
+    path: /api/projects/{projectId}/donations
+    controller: App\Controller\ProjectController::getAllDonationById
+    methods: [ GET ]

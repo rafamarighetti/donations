@@ -12,22 +12,23 @@ use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
-use Lexik\Bundle\JWTAuthenticationBundle\Security\Authentication\Token\JWTUserToken;
+
 
 class AuthController extends AbstractController
 {
     public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder)
     {
+        $request = json_decode($request->getContent(), true);
+    
         $data = [
-            'firstName' => $request->request->get('firstName'),
-            'lastName' => $request->request->get('lastName'),
-            'userPassword' => $request->request->get('userPassword'),
-            'userEmail' => $request->request->get('userEmail')
+            'firstName' => $request['firstName'],
+            'lastName' => $request['lastName'],
+            'userPassword' => $request['userPassword'],
+            'userEmail' => $request['userEmail'],
         ];
 
         $validator = Validation::createValidator();
         $constraint = new Assert\Collection(array(
-            // the keys correspond to the keys in the input array
             'firstName' => new Assert\Length(array('min' => 1)),
             'lastName' => new Assert\Length(array('min' => 1)),
             'userPassword' => new Assert\Length(array('min' => 4)),
@@ -41,7 +42,7 @@ class AuthController extends AbstractController
         $lastName = $data['lastName'];
         $userPassword = $data['userPassword'];
         $userEmail = $data['userEmail'];
-        $userRole = $request->request->get('userRole');
+        $userRole =  $request['userRole'];
 
         $user = new User();
         $user
@@ -65,28 +66,31 @@ class AuthController extends AbstractController
         }
         return new JsonResponse(["success" => $user->getUsername(). " has been registered!"], 200);
     }
-
-    public function login(Request $request, JWTTokenManagerInterface $JWTManager, UserPasswordEncoderInterface $passwordEncoder)
+    
+    public function login(Request $request, JWTTokenManagerInterface $jwtManager, UserPasswordEncoderInterface $passwordEncoder)
     {
+        $request = json_decode($request->getContent(), true);
+               
         try {
             $repository = $this->getDoctrine()->getRepository(User::class);
+
             $userData = $repository->findOneBy([
-                'email' => $request->request->get('username'),
+                'email' => $request['username'],
             ]);
 
-            $validePassword = $passwordEncoder->isPasswordValid($userData, $request->request->get('password'));
+            $validePassword = $passwordEncoder->isPasswordValid($userData, $request['password']);
 
             if (!$validePassword) {
-                return new JsonResponse(["error" => 'Wrong credentials.'], 500);
+                return new JsonResponse(["error" => 'Dados de usuário não conferem!.'], 500);
             }
 
-            $token =  $JWTManager->create($userData);
-
-            $userToken = new JWTUserToken($userData->getRoles(), $userData, $token);
+            $token =  $jwtManager->create($userData);
 
             $userInformations = array(
                 'id'         => $userData->getId(),
                 'username'   => $userData->getUsername(),
+                'firstName'   => $userData->getfirstName(),
+                'lastName'   => $userData->getlastName(),
                 'email'      => $userData->getEmail(),
                 'roles'      => $userData->getRoles(),
                 'token'      => $token
@@ -107,10 +111,10 @@ class AuthController extends AbstractController
                     ->onPreUpdate();
             } else {
                 $auth
-                    ->setUser($userData)
                     ->setToken($token)
+                    ->setUser($userData)
                     ->onPrePersist();
-
+                    
                 $entityManager->persist($auth);
             }
 

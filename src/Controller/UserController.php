@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -13,13 +12,33 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class UserController extends AbstractController
 {
+    public function users()
+    {
+        $users = $this->getDoctrine()->getRepository(User::class)->findAll();
+
+        foreach($users as $key => $user){
+            $users[$key] =  [
+                    'id'=>$user->getId(),
+                    'userEmail'=>$user->getEmail(),
+                    'firstName' => $user->getFirstName(),
+                    'lastName' => $user->getLastName(),
+                    'userRole' => $user->getRoles()
+            ];
+           
+        }
+
+        return new JsonResponse($users, 200);
+    }
+
     public function create(Request $request, UserPasswordEncoderInterface $passwordEncoder)
     {
+        $request = json_decode($request->getContent(), true);
+        
         $data = [
-            'firstName' => $request->request->get('firstName'),
-            'lastName' => $request->request->get('lastName'),
-            'userPassword' => $request->request->get('userPassword'),
-            'userEmail' => $request->request->get('userEmail')
+            'firstName' => $request['firstName'],
+            'lastName' => $request['lastName'],
+            'userPassword' => $request['userPassword'],
+            'userEmail' => $request['userEmail']
         ];
 
         $validator = Validation::createValidator();
@@ -38,7 +57,7 @@ class UserController extends AbstractController
         $lastName = $data['lastName'];
         $userPassword = $data['userPassword'];
         $userEmail = $data['userEmail'];
-        $userRole = $request->request->get('userRole');
+        $userRole = $request['userRole'];
 
         $user = new User();
         $user
@@ -63,58 +82,64 @@ class UserController extends AbstractController
         return new JsonResponse(["success" => $user->getUsername(). " has been registered!"], 200);
     }
 
-    public function delete(Request $request)
+    public function delete(int $id)
     {
-        try {
-            $repository = $this->getDoctrine()->getRepository(User::class);
-            $email      = $request->request->get('email');
-            $userData   = $repository->findOneBy([
-                'email' => $email,
-            ]);
+        $repository = $this->getDoctrine()->getRepository(User::class);
+        $user = $repository->findOneBy([
+            'id' => $id
+        ]);
+        
 
+        if (!$user) {
+            return new JsonResponse(["error" => 'User not exists'], 500);
+        } else {
             $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->remove($userData);
+            $entityManager->remove($user);
             $entityManager->flush();
-            return new Response(sprintf('%s successfully removed.', $email));
-        } catch (\Exception $e) {
-            return new JsonResponse(["error" => "User not found!"], 500);
+            return new Response(sprintf('%s successfully removed.', $user->getLastName()));
         }
     }
-
-    public function edit(Request $request, UserPasswordEncoderInterface $passwordEncoder)
+    
+    public function edit(int $id, Request $request, UserPasswordEncoderInterface $passwordEncoder)
     {
+        $request = json_decode($request->getContent(), true);
         try {
             $data = [];
             $validateData = [];
 
-            if ($request->request->get('userEmail')) {
+            if ($id) {
                 $repository = $this->getDoctrine()->getRepository(User::class);
-                $email      = $request->request->get('userEmail');
-                $user       = $repository->findOneBy([
-                    'email' => $email,
+                $user = $repository->findOneBy([
+                    'id' => $id,
                 ]);
 
-                if (!$user) {
+                if (!$id) {
                     return new JsonResponse(["error" => 'User not exists'], 500);
                 }
             } else {
-                return new JsonResponse(["error" => 'Please set User Email'], 500);
+                return new JsonResponse(["error" => 'Please set param project ID in route'], 500);
             }
 
-            if ($request->request->get('firstName')) {
-                $data['firstName'] = $request->request->get('firstName');
+            if ($request['firstName']) {
+                $data['firstName'] = $request['firstName'];
                 $validateData['firstName'] = new Assert\Length(array('min' => 1));
                 $user->setFirstName($data['firstName']);
             }
 
-            if ($request->request->get('lastName')) {
-                $data['lastName'] = $request->request->get('lastName');
+            if ($request['lastName']) {
+                $data['lastName'] = $request['lastName'];
                 $validateData['lastName'] = new Assert\Length(array('min' => 1));
                 $user->setLastName($data['lastName']);
             }
 
-            if ($request->request->get('userPassword')) {
-                $data['userPassword'] = $request->request->get('userPassword');
+            if ($request['userEmail']) {
+                $data['userEmail'] = $request['userEmail'];
+                $validateData['userEmail'] = new Assert\Length(array('min' => 1));
+                $user->setEmail($data['userEmail']);
+            }
+
+            if ($request['userPassword']) {
+                $data['userPassword'] = $request['userPassword'];
                 $validateData['userPassword'] = new Assert\Length(array('min' => 1));
                 $user->setPassword($data['userPassword']);
 
@@ -132,7 +157,7 @@ class UserController extends AbstractController
                 }
             }
 
-            $userRole = $request->request->get('userRole');
+            $userRole = $request['userRole'];
 
             if ($userRole) {
                 $user->setRoles($userRole);
@@ -143,16 +168,14 @@ class UserController extends AbstractController
         } catch (\Exception $e) {
             return new JsonResponse(["error" => $e->getMessage()], 500);
         }
-        return new Response(sprintf('%s already upadeted!', $email));
+        return new Response(sprintf('%s already upadeted!', $user->getFirstName()));
     }
 
-    public function view(string $email)
+    public function view(string $id)
     {
-        $email = urldecode($email);
-
         $repository = $this->getDoctrine()->getRepository(User::class);
-        $user       = $repository->findOneBy([
-            'email' => $email,
+        $user = $repository->findOneBy([
+            'id' => $id,
         ]);
 
         if (!$user) {
@@ -160,10 +183,11 @@ class UserController extends AbstractController
         }
 
         $data = [
+            'id'=>$user->getId(),
             'userEmail'=>$user->getEmail(),
             'firstName' => $user->getFirstName(),
             'lastName' => $user->getLastName(),
-            'Role' => $user->getRoles()
+            'userRole' => $user->getRoles()
         ];
 
         return new JsonResponse($data, 200);
