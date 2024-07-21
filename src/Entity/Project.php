@@ -16,7 +16,7 @@ class Project
 {
 
         /**
-     * @var int $id
+     * @var int $id 
      *
      * @ORM\Id()
      * @ORM\GeneratedValue()
